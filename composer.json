@@ -1,0 +1,19 @@
+{
+    "name": "kawasutanku/poke-tracker",
+    "description": "National Pokédex tracker with mobile-friendly PWA interface.",
+    "type": "project",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "PokeTracker\\": "src/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

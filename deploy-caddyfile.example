@@ -1,0 +1,23 @@
+http_port 8080
+https_port 8443
+frankenphp {
+    max_requests 10000
+}
+order php_server before file_server
+
+:8080 {
+    @poke host poke.warpstrand.com
+    redir @poke https://poke.warpstrand.com:8443{uri} permanent
+}
+
+poke.warpstrand.com:8443 {
+    tls internal
+    root * /opt/caddy/poke.warpstrand.com/web
+    php_server {
+        worker {
+            file /opt/caddy/poke.warpstrand.com/web/index.php
+            num 2
+        }
+    }
+    file_server
+}
