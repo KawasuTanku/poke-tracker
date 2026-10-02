@@ -262,7 +262,10 @@ use function PokeTracker\e;
             <div class="user-info">
                 <?= e($user['username']) ?>
                 <?php if ($isAdmin): ?> (admin)<?php endif; ?>
-                | <a href="/logout">Logout</a>
+                | <form method="POST" action="/logout" style="display:inline">
+                    <input type="hidden" name="csrf" value="<?= e(csrfToken()) ?>">
+                    <button type="submit" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:inherit;padding:0">Logout</button>
+                </form>
             </div>
         <?php else: ?>
             <div class="user-info"><a href="/login">Login</a></div>
