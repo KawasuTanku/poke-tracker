@@ -38,7 +38,7 @@ echo "==> Using composer: $COMPOSER_BIN"
 REMOTE="${POKE_REMOTE:-https://github.com/KawasuTanku/poke-tracker.git}"
 DEST="${POKE_DEST:-/opt/caddy/poke.warpstrand.com}"
 OWNER="www-data:www-data"
-BRANCH="${POKE_BRANCH:-main}"
+BRANCH="${POKE_BRANCH:-master}"
 
 # Git operations need write access to the parent dir — run as root or current user.
 # Only composer install and file ownership need www-data.
