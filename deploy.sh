@@ -31,9 +31,24 @@ DEST="${POKE_DEST:-/opt/caddy/poke.warpstrand.com}"
 OWNER="www-data:www-data"
 BRANCH="${POKE_BRANCH:-main}"
 
+# Git operations need write access to the parent dir — run as root or current user.
+# Only composer install and file ownership need www-data.
+git_as() {
+    if [[ "$(id -u)" -eq 0 ]]; then
+        bash -c "$1"
+    else
+        bash -c "$1"
+    fi
+}
 run_as() { if [[ "$(id -u)" -eq 0 ]]; then sudo -u www-data bash -c "$1"; else bash -c "$1"; fi; }
 
 echo "==> Deploying poke-tracker to $DEST"
+
+# Ensure parent dir exists with correct ownership
+if [[ "$(id -u)" -eq 0 ]]; then
+    mkdir -p "$(dirname "$DEST")"
+    chown www-data:www-data "$(dirname "$DEST")"
+fi
 
 DATA_BAK="$(mktemp -d "${TMPDIR:-/tmp}/poke-data.XXXXXX")"
 if [[ -e "$DEST/data" ]]; then
@@ -43,13 +58,13 @@ fi
 
 if [[ -d "$DEST/.git" ]]; then
     echo "==> Existing repo found — force-syncing to $REMOTE ($BRANCH)"
-    run_as "cd '$DEST' && (git remote set-url origin '$REMOTE' 2>/dev/null || git remote add origin '$REMOTE') && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
+    git_as "cd '$DEST' && (git remote set-url origin '$REMOTE' 2>/dev/null || git remote add origin '$REMOTE') && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
 elif [[ -d "$DEST" ]]; then
     echo "==> Path exists without a repo — initialising git and checking out $BRANCH"
-    run_as "cd '$DEST' && git init -q && git remote add -f origin '$REMOTE' && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
+    git_as "cd '$DEST' && git init -q && git remote add -f origin '$REMOTE' && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
 else
     echo "==> Fresh deploy — cloning repo"
-    run_as "git clone --branch '$BRANCH' '$REMOTE' '$DEST'"
+    git_as "git clone --branch '$BRANCH' '$REMOTE' '$DEST'"
 fi
 
 if [[ -e "$DATA_BAK/data" ]]; then
