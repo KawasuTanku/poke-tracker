@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 use function PokeTracker\e;
+use function PokeTracker\csrfToken;
 /** @var string $title */
 /** @var string $body */
 /** @var array $user */
