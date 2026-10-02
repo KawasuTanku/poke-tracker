@@ -60,12 +60,30 @@ class App
                 updated_at INTEGER NOT NULL
             )
         ");
+        $this->db->exec("
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        ");
     }
 
-    public function seedIfEmpty(): void
+    public function seedIfNeeded(): void
     {
-        if ($this->pokedex->count() === 0) {
+        $seedFile = __DIR__ . '/../seeds/pokedex.json';
+        if (!file_exists($seedFile)) {
+            throw new \RuntimeException('Seed file not found: ' . $seedFile);
+        }
+        $seedHash = md5_file($seedFile);
+
+        $stmt = $this->db->prepare("SELECT value FROM settings WHERE key = 'seed_version'");
+        $stmt->execute();
+        $currentVersion = $stmt->fetchColumn();
+
+        if ($currentVersion !== $seedHash) {
             $this->pokedex->seed();
+            $this->db->prepare("INSERT OR REPLACE INTO settings (key, value) VALUES ('seed_version', ?)")
+                ->execute([$seedHash]);
         }
     }
 }

@@ -30,7 +30,7 @@ require __DIR__ . '/../vendor/autoload.php';
 $app = new App(__DIR__ . '/..');
 $GLOBALS['app'] = $app;
 
-$app->seedIfEmpty();
+$app->seedIfNeeded();
 
 function handle_request(App $app): void
 {
