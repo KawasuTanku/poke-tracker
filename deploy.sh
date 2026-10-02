@@ -68,13 +68,13 @@ fi
 
 if [[ -d "$DEST/.git" ]]; then
     echo "==> Existing repo found — force-syncing to $REMOTE ($BRANCH)"
-    git_as "cd '$DEST' && (git remote set-url origin '$REMOTE' 2>/dev/null || git remote add origin '$REMOTE') && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
+    git_as "cd '$DEST' && (git remote set-url origin '$REMOTE' 2>/dev/null || git remote add origin '$REMOTE') && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'" || { echo "ERROR: Git sync failed"; exit 1; }
 elif [[ -d "$DEST" ]]; then
     echo "==> Path exists without a repo — initialising git and checking out $BRANCH"
-    git_as "cd '$DEST' && git init -q && git remote add -f origin '$REMOTE' && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'"
+    git_as "cd '$DEST' && git init -q && git remote add -f origin '$REMOTE' && git fetch -q origin '$BRANCH' && git checkout -q -f -B '$BRANCH' origin/'$BRANCH'" || { echo "ERROR: Git init failed"; exit 1; }
 else
     echo "==> Fresh deploy — cloning repo"
-    git_as "git clone --branch '$BRANCH' '$REMOTE' '$DEST'"
+    git_as "git clone --branch '$BRANCH' '$REMOTE' '$DEST'" || { echo "ERROR: Git clone failed"; exit 1; }
 fi
 
 if [[ -e "$DATA_BAK/data" ]]; then
@@ -85,7 +85,7 @@ fi
 rm -rf "$DATA_BAK"
 
 echo "==> Installing composer dependencies"
-sudo -u www-data bash -c "cd '$DEST' && $COMPOSER_BIN install --no-dev --no-interaction --optimize-autoloader"
+sudo -u www-data bash -c "cd '$DEST' && $COMPOSER_BIN install --no-dev --no-interaction --optimize-autoloader" || { echo "ERROR: Composer install failed"; exit 1; }
 
 echo "==> Preparing data directory"
 mkdir -p "$DEST/data" && chmod 750 "$DEST/data"
