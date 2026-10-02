@@ -44,6 +44,7 @@ BRANCH="${POKE_BRANCH:-main}"
 # Only composer install and file ownership need www-data.
 git_as() {
     if [[ "$(id -u)" -eq 0 ]]; then
+        git config --global --add safe.directory "$DEST" 2>/dev/null || true
         bash -c "$1"
     else
         bash -c "$1"
