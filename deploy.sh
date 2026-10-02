@@ -17,14 +17,23 @@ elif [[ -x /opt/caddy/bin/composer.phar ]]; then
     COMPOSER_BIN="/opt/caddy/bin/composer.phar"
 elif [[ -x /opt/caddy/composer.phar ]]; then
     COMPOSER_BIN="/opt/caddy/composer.phar"
+elif command -v composer >/dev/null 2>&1; then
+    COMPOSER_BIN="$(command -v composer)"
 else
     echo "==> Composer not found — downloading to /opt/caddy/bin/composer.phar"
     mkdir -p /opt/caddy/bin
     php -r "copy('https://getcomposer.org/installer', '/tmp/composer-setup.php');"
     php /tmp/composer-setup.php --install-dir=/opt/caddy/bin --filename=composer.phar
     rm -f /tmp/composer-setup.php
-    COMPOSER_BIN="/opt/caddy/bin/composer.phar"
+    if [[ -x /opt/caddy/bin/composer.phar ]]; then
+        COMPOSER_BIN="/opt/caddy/bin/composer.phar"
+    else
+        echo "ERROR: Failed to install composer. Install manually or set COMPOSER env var."
+        exit 1
+    fi
 fi
+
+echo "==> Using composer: $COMPOSER_BIN"
 
 REMOTE="${POKE_REMOTE:-https://github.com/KawasuTanku/poke-tracker.git}"
 DEST="${POKE_DEST:-/opt/caddy/poke.warpstrand.com}"
